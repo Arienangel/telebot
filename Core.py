@@ -10,12 +10,13 @@ from collections import Counter
 try:
     Token = os.environ["Token"]
     Webhook = os.environ["Webhook"]
-    debug_max_n=os.environ["debug_max_n"]
+    debug_max_n = int(os.environ["debug_max_n"])
 except:
     with open("config.json", encoding="utf-8") as f:
         cfg = json.load(f)
     Token = cfg["Token"]
     Webhook = cfg["Webhook"]
+    debug_max_n = int(cfg["debug_max_n"])
 PORT = int(os.environ.get('PORT', 8443))
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
