@@ -7,14 +7,14 @@ import numpy as np
 
 try:
     banlist = os.environ["banlist"].split()
-    prob_range = map(int, os.environ["prob_range"].split())
+    prob_range = tuple(map(int, os.environ["prob_range"].split()))
     fortune_key = os.environ["fortune_key"].split()
     fortune_prob = tuple(map(float, os.environ["fortune_prob"].split()))
 except:
     with open("config.json", encoding="utf-8") as f:
         cfg = json.load(f)
     banlist = cfg["banlist"].split()
-    prob_range = map(int, cfg["prob_range"].split())
+    prob_range = tuple(map(int, cfg["prob_range"].split()))
     fortune_key = cfg["fortune_key"].split()
     fortune_prob = tuple(map(float, cfg["fortune_prob"].split()))
 
