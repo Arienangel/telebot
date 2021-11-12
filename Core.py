@@ -7,20 +7,22 @@ import json
 import Operation
 from collections import Counter
 
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 try:
     Token = os.environ["Token"]
     Webhook = os.environ["Webhook"]
     debug_max_n = int(os.environ["debug_max_n"])
+    logger.info("Setup from config vars")
 except:
     with open("config.json", encoding="utf-8") as f:
         cfg = json.load(f)
     Token = cfg["Token"]
     Webhook = cfg["Webhook"]
     debug_max_n = int(cfg["debug_max_n"])
+    logger.info("Setup from json file")
 PORT = int(os.environ.get('PORT', 8443))
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 def command_logger(func):
