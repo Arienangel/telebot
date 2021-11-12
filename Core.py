@@ -10,6 +10,7 @@ from collections import Counter
 try:
     Token = os.environ["Token"]
     Webhook = os.environ["Webhook"]
+    debug_max_n=os.environ["debug_max_n"]
 except:
     with open("config.json", encoding="utf-8") as f:
         cfg = json.load(f)
@@ -110,7 +111,7 @@ def debug(update, context):
     if len(list):
         if list[0] == "cmd":
             n = int(list[1])
-            if n > 1000000: n = 1000000
+            if n > debug_max_n: n = debug_max_n
             if list[2] == "chance":
                 result = Counter(Operation.chance(range(n), format=False, check=False))
                 text = f"n={n}\n" + "\n".join(
