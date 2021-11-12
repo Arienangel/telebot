@@ -1,0 +1,9 @@
+{
+    "Token": "",
+    "Webhook": "",
+    "debug_max_n": 10000000,
+    "banlist": "",
+    "prob_range": "25 76",
+    "fortune_key": "大吉 吉 小吉 尚可 小兇 兇 大凶",
+    "fortune_prob": "0.05 0.1 0.2 0.3 0.2 0.1 0.05"
+}
