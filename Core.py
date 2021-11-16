@@ -86,7 +86,10 @@ def fortune(update, context):
 @command_logger
 def randstr(update, context):
     L = context.args
-    L[1] = tuple(L[1])
+    try:
+        L[1] = tuple(L[1])
+    except IndexError:
+        pass
     try:
         text = Operation.randstr(*L)
     except:
@@ -158,17 +161,22 @@ def Inline(update, context):
     update.inline_query.answer(results, cache_time=0)
 
 
-updater = Updater(Token, use_context=True)
-dp = updater.dispatcher
-dp.add_handler(CommandHandler("start", help))
-dp.add_handler(CommandHandler("help", help))
-dp.add_handler(CommandHandler("meow", meow))
-dp.add_handler(CommandHandler("chance", chance))
-dp.add_handler(CommandHandler("fortune", fortune))
-dp.add_handler(CommandHandler("string", randstr))
-dp.add_handler(CommandHandler("pick", pick))
-dp.add_handler(CommandHandler("debug", debug))
-dp.add_handler(InlineQueryHandler(Inline))
-dp.add_error_handler(error)
-updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=Token, webhook_url=Webhook + Token)
-updater.idle()
+def main():
+    updater = Updater(Token, use_context=True)
+    dp = updater.dispatcher
+    dp.add_handler(CommandHandler("start", help))
+    dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("meow", meow))
+    dp.add_handler(CommandHandler("chance", chance))
+    dp.add_handler(CommandHandler("fortune", fortune))
+    dp.add_handler(CommandHandler("string", randstr))
+    dp.add_handler(CommandHandler("pick", pick))
+    dp.add_handler(CommandHandler("debug", debug))
+    dp.add_handler(InlineQueryHandler(Inline))
+    dp.add_error_handler(error)
+    updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=Token, webhook_url=Webhook + Token)
+    updater.idle()
+
+
+if __name__ == '__main__':
+    main()
