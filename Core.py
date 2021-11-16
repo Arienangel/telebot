@@ -5,24 +5,32 @@ import logging
 import os
 import json
 import Operation
-from collections import Counter
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("Core")
 
-try:
-    Token = os.environ["Token"]
-    Webhook = os.environ["Webhook"]
-    debug_max_n = int(os.environ["debug_max_n"])
-    logger.info("Setup from config vars")
-except:
+
+def setup(key, default=""):
+    if key in cfg:
+        logger.info('Setup "%s" from config.json', key)
+        return cfg[key]
+    elif key in os.environ.keys():
+        logger.info('Setup "%s" from environment variable', key)
+        return os.environ.get(key)
+    else:
+        logger.info('Setup "%s" from default value', key)
+        return default
+
+
+if os.path.exists("config.json"):
     with open("config.json", encoding="utf-8") as f:
         cfg = json.load(f)
-    Token = cfg["Token"]
-    Webhook = cfg["Webhook"]
-    debug_max_n = int(cfg["debug_max_n"])
-    logger.info("Setup from json file")
-PORT = int(os.environ.get('PORT', 8443))
+else:
+    cfg = dict()
+Token = setup("Token")
+Webhook = setup("Webhook")
+PORT = int(setup('PORT', 8443))
+debug_max_n = int(setup("debug_max_n", 10000000))
 
 
 def command_logger(func):
@@ -63,32 +71,25 @@ def meow(update, context):
 
 @command_logger
 def chance(update, context):
-    list = context.args
-    text = Operation.chance(list)
+    text = Operation.chance(*context.args)
     context.bot.send_message(update.effective_chat.id, text)
     return text
 
 
 @command_logger
 def fortune(update, context):
-    list = context.args
-    text = Operation.fortune(list)
+    text = Operation.fortune(*context.args)
     context.bot.send_message(update.effective_chat.id, text)
     return text
 
 
 @command_logger
-def string(update, context):
-    list = context.args
-    L = [8, 0, 1]
+def randstr(update, context):
+    L = context.args
+    L[1] = tuple(L[1])
     try:
-        L[0] = int(list[0])
-        L[1] = list[1]
-        L[2] = int(list[2])
-        text = Operation.random_string(L)
-    except IndexError:
-        text = Operation.random_string(L)
-    except ValueError:
+        text = Operation.randstr(*L)
+    except:
         text = "喵?"
     context.bot.send_message(update.effective_chat.id, text)
     return text
@@ -96,58 +97,39 @@ def string(update, context):
 
 @command_logger
 def pick(update, context):
-    list = context.args
-    if len(list) == 0:
-        text = "喵?"
-    else:
-        text = Operation.pick(list)
+    text = Operation.pick(*context.args)
     context.bot.send_message(update.effective_chat.id, text)
     return text
 
 
 @command_logger
 def debug(update, context):
-    list = context.args
-    if len(list):
-        if list[0] == "cmd":
-            n = int(list[1])
+    L = context.args
+    if len(L):
+        type = L[0]
+        if type == "cmd":
+            n, cmd, options = int(L[1]), L[2], L[3:]
             if n > debug_max_n: n = debug_max_n
-            if list[2] == "chance":
-                result = Counter(Operation.chance(range(n), format=False, check=False))
-                text = f"n={n}\n" + "\n".join(
-                    [f"{i}%: {j}, {j/n:.2%}" for i, j in sorted(result.items(), key=lambda x: x[0])])
-            elif list[2] == "fortune":
-                result = Counter(Operation.fortune(range(n), format=False, check=False))
-                text = f"n={n}\n" + "\n".join(
-                    [f"{i}: {j}, {j/n:.2%}" for i, j in sorted(result.items(), key=lambda x: x[0])])
-            elif list[2] == "pick":
-                result = Counter([Operation.pick(list[3:], format=False, check=False) for _ in range(n)])
-                text = f"n={n}\n" + "\n".join(
-                    [f"{i}: {j}, {j/n:.2%}" for i, j in sorted(result.items(), key=lambda x: list[2:].index(x[0]))])
-            else:
-                text = "Not supported cmd"
-        elif list[0] == "update":
+            text = Operation.debug_cmd(cmd, n=n, options=options)
+        elif type == "update":
             text = str(update)
-        elif list[0] == "help":
-            text = "\n".join(["/debug cmd n command [cmd_args]", "/debug update", "/debug help"])
+        elif type == "help":
+            text = "\n".join(["/debug cmd n command [options]", "/debug update", "/debug help"])
         else:
-            text = "Not supported mode"
+            text = "Not supported debug type"
     else:
         if update.effective_chat.type == "private":
             text = str(update)
         else:
             text = "Not supported"
-    try:
-        context.bot.send_message(update.effective_chat.id, text)
-    except:
-        pass
+    context.bot.send_message(update.effective_chat.id, text)
     return text
 
 
 def Inline(update, context):
     logger.info("Receive inline query: %s", update)
     input = update.inline_query.query
-    list = update.inline_query.query.split()
+    L = update.inline_query.query.split()
     results = (
         InlineQueryResultArticle(
             str(uuid4()),
@@ -157,41 +139,36 @@ def Inline(update, context):
         InlineQueryResultArticle(
             str(uuid4()),
             "預言家: 求發生機率",
-            InputTextMessageContent(Operation.chance(list)),
+            InputTextMessageContent(Operation.chance(*L)),
             description="(事項1 事項2 事項3...)",
         ),
         InlineQueryResultArticle(
             str(uuid4()),
             "占卜師: 大吉or大凶?",
-            InputTextMessageContent(Operation.fortune(list)),
+            InputTextMessageContent(Operation.fortune(*L)),
             description="(事項1 事項2 事項3...)",
         ),
         InlineQueryResultArticle(
             str(uuid4()),
             "機器喵點點名",
-            InputTextMessageContent("喵?" if len(input) == 0 else Operation.pick(list)),
+            InputTextMessageContent("喵?" if len(input) == 0 else Operation.pick(*L)),
             description="選項1 (選項2 選項3...)",
         ),
     )
     update.inline_query.answer(results, cache_time=0)
 
 
-def main():
-    updater = Updater(Token, use_context=True)
-    dp = updater.dispatcher
-    dp.add_handler(CommandHandler("start", help))
-    dp.add_handler(CommandHandler("help", help))
-    dp.add_handler(CommandHandler("meow", meow))
-    dp.add_handler(CommandHandler("chance", chance))
-    dp.add_handler(CommandHandler("fortune", fortune))
-    dp.add_handler(CommandHandler("string", string))
-    dp.add_handler(CommandHandler("pick", pick))
-    dp.add_handler(CommandHandler("debug", debug))
-    dp.add_handler(InlineQueryHandler(Inline))
-    dp.add_error_handler(error)
-    updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=Token, webhook_url=Webhook + Token)
-    updater.idle()
-
-
-if __name__ == '__main__':
-    main()
+updater = Updater(Token, use_context=True)
+dp = updater.dispatcher
+dp.add_handler(CommandHandler("start", help))
+dp.add_handler(CommandHandler("help", help))
+dp.add_handler(CommandHandler("meow", meow))
+dp.add_handler(CommandHandler("chance", chance))
+dp.add_handler(CommandHandler("fortune", fortune))
+dp.add_handler(CommandHandler("string", randstr))
+dp.add_handler(CommandHandler("pick", pick))
+dp.add_handler(CommandHandler("debug", debug))
+dp.add_handler(InlineQueryHandler(Inline))
+dp.add_error_handler(error)
+updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=Token, webhook_url=Webhook + Token)
+updater.idle()
