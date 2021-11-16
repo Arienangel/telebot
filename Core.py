@@ -83,10 +83,7 @@ def string(update, context):
     L = [8, 0, 1]
     try:
         L[0] = int(list[0])
-        if 0 <= int(list[1]) <= 3:
-            L[1] = int(list[1])
-        else:
-            raise ValueError
+        L[1] = list[1]
         L[2] = int(list[2])
         text = Operation.random_string(L)
     except IndexError:
