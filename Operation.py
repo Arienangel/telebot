@@ -65,7 +65,9 @@ def fortune(list, format=True, check=True):
 
 
 def random_string(list, format=True):
-    pool = (string.digits, string.ascii_lowercase, string.ascii_letters, string.punctuation + string.ascii_letters)[list[1]]
+    pool=str()
+    for i in map(int, tuple(str(list[1]))):
+        pool+=(string.digits, string.ascii_lowercase, string.ascii_uppercase, string.punctuation)[i]
     getstring = lambda: "".join(np.random.choice(tuple(pool), list[0]))
     L = [getstring() for _ in range(list[2])]
     if format:

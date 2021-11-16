@@ -48,7 +48,7 @@ def help(update, context):
         "/chance (事項1 事項2 事項3...): 預言家:求發生機率",
         "/fortune (事項1 事項2 事項3...): 占卜師:大吉or大凶?",
         "/pick 選項1 (選項2 選項3...): 機器喵點點名 ",
-        "/string (長度) (0: 數字, 1: 小寫, 2: 大小寫, 3: 大小寫+符號) (數量): 亂數產生器",
+        "/string (長度) (0: 數字, 1: 小寫, 2: 大寫, 3: 符號) (數量): 亂數產生器",
     ])
     context.bot.send_message(update.effective_chat.id, text)
     return text
