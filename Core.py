@@ -35,12 +35,19 @@ debug_max_n = int(setup("debug_max_n", 10000000))
 
 def command_logger(func):
     def log(update, context):
-        logger.info("Receive update: %s", update)
+        chat_type = update.effective_chat.type
+        if chat_type=="group" or chat_type=="supergroup":
+            logger.info('Receive bot command "%s" from "%s" send by "%s', update.effective_message.text, update.effective_chat.title, update.effective_user.full_name)
+        elif chat_type=="private":
+            logger.info('Receive bot command "%s" send by "%s"', update.effective_message.text, update.effective_user.full_name)
         message = func(update, context)
         try:
-            logger.info('Send "%s" to %s', message.replace(r"\n", r"\t"), update.effective_chat)
+            if chat_type=="group" or chat_type=="supergroup":
+                logger.info('Send "%s" to %s', message.replace(r"\n", r"\t"), update.effective_chat.title)
+            elif chat_type=="private":
+                logger.info('Send "%s" to %s', message.replace(r"\n", r"\t"), update.effective_user.full_name)
         except:
-            logger.info(message)
+            logger.info(f'{message}')
 
     return log
 
@@ -64,7 +71,7 @@ def help(update, context):
 
 @command_logger
 def meow(update, context):
-    text = "喵~" if len(context.args) == 0 else update.message.text.split(maxsplit=1)[1]
+    text = "喵~" if len(context.args) == 0 else update.effective_message.text.split(maxsplit=1)[1]
     context.bot.send_message(update.effective_chat.id, text)
     return text
 
@@ -113,7 +120,7 @@ def debug(update, context):
         if type == "cmd":
             n, cmd, options = int(L[1]), L[2], L[3:]
             if n > debug_max_n: n = debug_max_n
-            text = Operation.debug_cmd(cmd, n=n, options=options)
+            text = Operation.cmd_debugger(cmd, n=n, options=options)
         elif type == "update":
             text = str(update)
         elif type == "help":
@@ -154,7 +161,7 @@ def Inline(update, context):
         InlineQueryResultArticle(
             str(uuid4()),
             "機器喵點點名",
-            InputTextMessageContent("喵?" if len(input) == 0 else Operation.pick(*L)),
+            InputTextMessageContent(Operation.pick(*L)),
             description="選項1 (選項2 選項3...)",
         ),
     )

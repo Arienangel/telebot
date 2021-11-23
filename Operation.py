@@ -37,7 +37,7 @@ fortune_prob = tuple(map(float, setup("fortune_prob").split()))
 def bancheck(banned: list, check: list):
     for i in banned:
         for j in check:
-            if re.search(str(i), str(j)):
+            if re.search(str(i), str(j), flags=re.IGNORECASE):
                 return True
     else:
         return False
@@ -101,7 +101,7 @@ def pick(*args, format=True, check=True):
         return "窩不知道"
 
 
-def debug_cmd(cmd, **kwargs):
+def cmd_debugger(cmd, **kwargs):
     if cmd == "chance":
         n = int(kwargs["n"])
         result = Counter(chance(*range(n), format=False, check=False))
