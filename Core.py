@@ -37,7 +37,7 @@ def command_logger(func):
     def log(update, context):
         chat_type = update.effective_chat.type
         if chat_type=="group" or chat_type=="supergroup":
-            logger.info('Receive bot command "%s" from "%s" send by "%s', update.effective_message.text, update.effective_chat.title, update.effective_user.full_name)
+            logger.info('Receive bot command "%s" from "%s" send by "%s"', update.effective_message.text, update.effective_chat.title, update.effective_user.full_name)
         elif chat_type=="private":
             logger.info('Receive bot command "%s" send by "%s"', update.effective_message.text, update.effective_user.full_name)
         message = func(update, context)
@@ -53,7 +53,7 @@ def command_logger(func):
 
 
 def error(update, context):
-    logger.warning('Update "%s" caused error "%s"', update, context.error)
+    logger.warning('Update "%s" caused error "%s"', update.effective_message.text, context.error)
 
 
 @command_logger
@@ -137,7 +137,11 @@ def debug(update, context):
 
 
 def Inline(update, context):
-    logger.info("Receive inline query: %s", update)
+    chat_type = update.effective_chat.type
+    if chat_type=="group" or chat_type=="supergroup":
+        logger.info('Receive inline query "%s" from "%s" send by "%s', update.inline_query.query, update.effective_chat.title, update.effective_user.full_name)
+    elif chat_type=="private":
+        logger.info('Receive inline query "%s" send by "%s"', update.inline_query.query, update.effective_user.full_name)
     input = update.inline_query.query
     L = update.inline_query.query.split()
     results = (

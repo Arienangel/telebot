@@ -94,7 +94,7 @@ def pick(*args, format=True, check=True):
             return "窩不知道"
     if len(args):
         if format:
-            return "選項: " + ", ".join(args) + "\n機器喵選擇: " + random.choice(args)
+            return "選項: " + " ".join(args) + "\n機器喵選擇: " + random.choice(args)
         else:
             return random.choice(args)
     else:
