@@ -111,6 +111,10 @@ def pick(update, context):
     context.bot.send_message(update.effective_chat.id, text)
     return text
 
+@command_logger
+def dice(update, context):
+    context.bot.send_dice(update.effective_chat.id)
+    return "Dice"
 
 @command_logger
 def debug(update, context):
@@ -137,7 +141,7 @@ def debug(update, context):
 
 
 def Inline(update, context):
-    chat_type = update.effective_chat.type
+    chat_type = update.inline_query.chat_type
     if chat_type=="group" or chat_type=="supergroup":
         logger.info('Receive inline query "%s" from "%s" send by "%s', update.inline_query.query, update.effective_chat.title, update.effective_user.full_name)
     elif chat_type=="private":
@@ -182,6 +186,7 @@ def main():
     dp.add_handler(CommandHandler("fortune", fortune))
     dp.add_handler(CommandHandler("string", randstr))
     dp.add_handler(CommandHandler("pick", pick))
+    dp.add_handler(CommandHandler("dice", dice))
     dp.add_handler(CommandHandler("debug", debug))
     dp.add_handler(InlineQueryHandler(Inline))
     dp.add_error_handler(error)
