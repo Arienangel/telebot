@@ -113,8 +113,12 @@ def pick(update, context):
 
 @command_logger
 def dice(update, context):
-    context.bot.send_dice(update.effective_chat.id)
-    return "Dice"
+    if context.args:
+        emoji=['🎲', '🎯', '🏀', '⚽', '🎰', '🎳'][int(context.args[0])]
+    else:
+        emoji='🎲'
+    context.bot.send_dice(update.effective_chat.id, emoji=emoji)
+    return emoji
 
 @command_logger
 def debug(update, context):
